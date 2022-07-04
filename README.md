@@ -286,14 +286,6 @@ Writing superblocks and filesystem accounting information: done
 12. Смонтируйте этот раздел в любую директорию, например, /tmp/new.
 ### Ответ
 ```bash
-root@vagrant:/home/vagrant# mkfs.ext4 /dev/netology/lv100m
-mke2fs 1.45.5 (07-Jan-2020)
-Creating filesystem with 25600 4k blocks and 25600 inodes
-
-Allocating group tables: done
-Writing inode tables: done
-Creating journal (1024 blocks): done
-Writing superblocks and filesystem accounting information: done
 
 root@vagrant:/home/vagrant# mkdir /tmp/new
 root@vagrant:/home/vagrant# mount /dev/netology/lv100m /tmp/new
@@ -305,11 +297,55 @@ root@vagrant:/home/vagrant# df -h | grep netology
 13. Поместите туда тестовый файл, например wget https://mirror.yandex.ru/ubuntu/ls-lR.gz -O /tmp/new/test.gz.
 ### Ответ
 ```bash
+root@vagrant:/home/vagrant# cd /tmp/new
+root@vagrant:/tmp/new# pwd
+/tmp/new
+root@vagrant:/tmp/new# wget https://mirror.yandex.ru/ubuntu/ls-lR.gz -O /tmp/new/test.gz
+--2022-07-04 17:02:34--  https://mirror.yandex.ru/ubuntu/ls-lR.gz
+Resolving mirror.yandex.ru (mirror.yandex.ru)... 213.180.204.183, 2a02:6b8::183
+Connecting to mirror.yandex.ru (mirror.yandex.ru)|213.180.204.183|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 23729313 (23M) [application/octet-stream]
+Saving to: ‘/tmp/new/test.gz’
+
+/tmp/new/test.gz              100%[=================================================>]  22.63M  2.22MB/s    in 9.6s
+
+2022-07-04 17:02:44 (2.35 MB/s) - ‘/tmp/new/test.gz’ saved [23729313/23729313]
+
+root@vagrant:/tmp/new# ls -l
+total 23192
+drwx------ 2 root root    16384 Jul  4 16:58 lost+found
+-rw-r--r-- 1 root root 23729313 Jul  4 14:18 test.gz
 ```
 
 14. Прикрепите вывод lsblk.
 ### Ответ
 ```bash
+root@vagrant:/tmp/new# lsblk
+NAME                      MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINT
+loop0                       7:0    0 55.4M  1 loop  /snap/core18/2128
+loop1                       7:1    0 70.3M  1 loop  /snap/lxd/21029
+loop3                       7:3    0 55.5M  1 loop  /snap/core18/2409
+loop4                       7:4    0   47M  1 loop  /snap/snapd/16010
+loop5                       7:5    0 61.9M  1 loop  /snap/core20/1518
+loop6                       7:6    0 67.8M  1 loop  /snap/lxd/22753
+sda                         8:0    0   64G  0 disk
+├─sda1                      8:1    0    1M  0 part
+├─sda2                      8:2    0    1G  0 part  /boot
+└─sda3                      8:3    0   63G  0 part
+  └─ubuntu--vg-ubuntu--lv 253:0    0 31.5G  0 lvm   /
+sdb                         8:16   0  2.5G  0 disk
+├─sdb1                      8:17   0    2G  0 part
+│ └─md0                     9:0    0    2G  0 raid1
+└─sdb2                      8:18   0  511M  0 part
+  └─md1                     9:1    0 1018M  0 raid0
+    └─netology-lv100m     253:1    0  100M  0 lvm   /tmp/new
+sdc                         8:32   0  2.5G  0 disk
+├─sdc1                      8:33   0    2G  0 part
+│ └─md0                     9:0    0    2G  0 raid1
+└─sdc2                      8:34   0  511M  0 part
+  └─md1                     9:1    0 1018M  0 raid0
+    └─netology-lv100m     253:1    0  100M  0 lvm   /tmp/new
 ```
 
 15. Протестируйте целостность файла:
@@ -319,9 +355,14 @@ root@vagrant:~# echo $?
 0
 ```
 ### Ответ
-```bash
-```
 
+
+```bash
+root@vagrant:/tmp/new# gzip -t /tmp/new/test.gz
+root@vagrant:/tmp/new# echo $?
+0
+```
+Вывод - файл с архивом целый
 16. Используя pvmove, переместите содержимое PV с RAID0 на RAID1.
 ### Ответ
 ```bash
