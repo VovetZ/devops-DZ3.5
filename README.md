@@ -423,7 +423,7 @@ root@vagrant:/tmp/new# gzip -t /tmp/new/test.gz
 root@vagrant:/tmp/new# echo $?
 0
 ```
-***Круто!!!
+***Круто!!!***
 
 20. Погасите тестовый хост, vagrant destroy.
 ### Ответ
