@@ -249,16 +249,57 @@ root@vagrant:/home/vagrant# vgcreate netology /dev/md0 /dev/md1
 10. Создайте LV размером 100 Мб, указав его расположение на PV с RAID0.
 ### Ответ
 ```bash
+root@vagrant:/home/vagrant# lvcreate --size 100M --name lv100m netology /dev/md1
+  Logical volume "lv100m" created.
+root@vagrant:/home/vagrant# lvdisplay netology
+  --- Logical volume ---
+  LV Path                /dev/netology/lv100m
+  LV Name                lv100m
+  VG Name                netology
+  LV UUID                Qr5Re1-fIcB-Sr1K-dvxc-3dTp-2buo-0zPKAs
+  LV Write Access        read/write
+  LV Creation host, time vagrant, 2022-07-04 16:55:43 +0000
+  LV Status              available
+  # open                 0
+  LV Size                100.00 MiB
+  Current LE             25
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     4096
+  Block device           253:1
 ```
 
 11. Создайте mkfs.ext4 ФС на получившемся LV.
 ### Ответ
 ```bash
+root@vagrant:/home/vagrant# mkfs.ext4 /dev/netology/lv100m
+mke2fs 1.45.5 (07-Jan-2020)
+Creating filesystem with 25600 4k blocks and 25600 inodes
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (1024 blocks): done
+Writing superblocks and filesystem accounting information: done
 ```
 
 12. Смонтируйте этот раздел в любую директорию, например, /tmp/new.
 ### Ответ
 ```bash
+root@vagrant:/home/vagrant# mkfs.ext4 /dev/netology/lv100m
+mke2fs 1.45.5 (07-Jan-2020)
+Creating filesystem with 25600 4k blocks and 25600 inodes
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (1024 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+root@vagrant:/home/vagrant# mkdir /tmp/new
+root@vagrant:/home/vagrant# mount /dev/netology/lv100m /tmp/new
+
+root@vagrant:/home/vagrant# df -h | grep netology
+/dev/mapper/netology-lv100m         93M   72K   86M   1% /tmp/new
 ```
 
 13. Поместите туда тестовый файл, например wget https://mirror.yandex.ru/ubuntu/ls-lR.gz -O /tmp/new/test.gz.
