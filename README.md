@@ -1,5 +1,5 @@
 # devops-DZ3.5
-1. Узнайте о sparse (разряженных) файлах.
+>1. Узнайте о sparse (разряженных) файлах.
 ### Ответ
 Разрежённый файл (англ. sparse file) — файл, в котором последовательности нулевых байтов заменены на информацию об этих последовательностях (список дыр).
 
@@ -21,11 +21,11 @@
 VirtualBox  поддерживает работу с разрежёнными файлами, это помогает экономить ресурсы хоста - для виртуалки выделяем N Гбайт дискового пространства, а по факту тратится ровно столько, сколько занято
 
 
-2. Могут ли файлы, являющиеся жесткой ссылкой на один объект, иметь разные права доступа и владельца? Почему?
+>2. Могут ли файлы, являющиеся жесткой ссылкой на один объект, иметь разные права доступа и владельца? Почему?
 ### Ответ
 Нет, не могут. В Linux каждый файл имеет уникальный идентификатор - индексный дескриптор (inode). Это число, которое однозначно идентифицирует файл в файловой системе. Жесткая ссылка и файл, для которой она создавалась имеют одинаковые inode. Поэтому жесткая ссылка имеет те же права доступа, владельца и время последней модификации, что и целевой файл.
 
-3. Сделайте vagrant destroy на имеющийся инстанс Ubuntu. Замените содержимое Vagrantfile следующим:
+>3. Сделайте vagrant destroy на имеющийся инстанс Ubuntu. Замените содержимое Vagrantfile следующим:
 ```bash
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-20.04"
@@ -43,7 +43,7 @@ end
 ### Ответ
 VM создана 
 
-4. Используя fdisk, разбейте первый диск на 2 раздела: 2 Гб, оставшееся пространство.
+>4. Используя fdisk, разбейте первый диск на 2 раздела: 2 Гб, оставшееся пространство.
 ### Ответ
 ```bash
 root@vagrant:/home/vagrant# fdisk -l | more
@@ -78,7 +78,7 @@ Device     Boot   Start     End Sectors  Size Id Type
 /dev/sdb2       4196352 5242879 1046528  511M 83 Linux
 ```
 
-5. Используя sfdisk, перенесите данную таблицу разделов на второй диск.
+>5. Используя sfdisk, перенесите данную таблицу разделов на второй диск.
 ### Ответ
 ```bash
 root@vagrant:/home/vagrant# sfdisk -d /dev/sdb | sfdisk /dev/sdc
@@ -124,7 +124,7 @@ Device     Boot   Start     End Sectors  Size Id Type
 /dev/sdc2       4196352 5242879 1046528  511M 83 Linux
 ```
 
-6. Соберите mdadm RAID1 на паре разделов 2 Гб.
+>6. Соберите mdadm RAID1 на паре разделов 2 Гб.
 ### Ответ
 ```bash
 root@vagrant:/home/vagrant# mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1
@@ -166,7 +166,7 @@ Consistency Policy : resync
        1       8       33        1      active sync   /dev/sdc1
 ```
 
-7. Соберите mdadm RAID0 на второй паре маленьких разделов.
+>7. Соберите mdadm RAID0 на второй паре маленьких разделов.
 ### Ответ
 ```bash
 root@vagrant:/home/vagrant# mdadm --create --verbose /dev/md1 --level=0 --raid-devices=2 /dev/sdb2 /dev/sdc2
@@ -207,11 +207,43 @@ Consistency Policy : none
 8. Создайте 2 независимых PV на получившихся md-устройствах.
 ### Ответ
 ```bash
+root@vagrant:/home/vagrant# pvcreate /dev/md0
+  Physical volume "/dev/md0" successfully created.
+root@vagrant:/home/vagrant# pvcreate /dev/md1
+  Physical volume "/dev/md1" successfully created.
+root@vagrant:/home/vagrant# pvs
+  PV         VG        Fmt  Attr PSize    PFree
+  /dev/md0             lvm2 ---    <2.00g   <2.00g
+  /dev/md1             lvm2 ---  1018.00m 1018.00m
+  /dev/sda3  ubuntu-vg lvm2 a--   <63.00g  <31.50g
 ```
 
 9. Создайте общую volume-group на этих двух PV.
 ### Ответ
 ```bash
+root@vagrant:/home/vagrant# vgcreate netology /dev/md0 /dev/md1
+  Volume group "netology" successfully created
+  root@vagrant:/home/vagrant# vgdisplay netology
+  --- Volume group ---
+  VG Name               netology
+  System ID
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  1
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               <2.99 GiB
+  PE Size               4.00 MiB
+  Total PE              765
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       765 / <2.99 GiB
+  VG UUID               OS1HH8-ReOv-kc9K-pE9n-Ud1s-Pprf-DcC5lH
 ```
 
 10. Создайте LV размером 100 Мб, указав его расположение на PV с RAID0.
