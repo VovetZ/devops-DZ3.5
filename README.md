@@ -428,4 +428,6 @@ root@vagrant:/tmp/new# echo $?
 20. Погасите тестовый хост, vagrant destroy.
 ### Ответ
 ```bash
+C:\vagrant_fs
+λ vagrant halt; vagrant destroy
 ```
