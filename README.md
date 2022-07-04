@@ -355,27 +355,60 @@ root@vagrant:~# echo $?
 0
 ```
 ### Ответ
-
-
 ```bash
 root@vagrant:/tmp/new# gzip -t /tmp/new/test.gz
 root@vagrant:/tmp/new# echo $?
 0
 ```
 Вывод - файл с архивом целый
-16. Используя pvmove, переместите содержимое PV с RAID0 на RAID1.
+
+>16. Используя pvmove, переместите содержимое PV с RAID0 на RAID1.
 ### Ответ
 ```bash
+root@vagrant:/tmp/new# pvmove /dev/md1 /dev/md0
+  /dev/md1: Moved: 100.00%
+root@vagrant:/tmp/new# lsblk
+NAME                      MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINT
+loop0                       7:0    0 55.4M  1 loop  /snap/core18/2128
+loop1                       7:1    0 70.3M  1 loop  /snap/lxd/21029
+loop3                       7:3    0 55.5M  1 loop  /snap/core18/2409
+loop4                       7:4    0   47M  1 loop  /snap/snapd/16010
+loop5                       7:5    0 61.9M  1 loop  /snap/core20/1518
+loop6                       7:6    0 67.8M  1 loop  /snap/lxd/22753
+sda                         8:0    0   64G  0 disk
+├─sda1                      8:1    0    1M  0 part
+├─sda2                      8:2    0    1G  0 part  /boot
+└─sda3                      8:3    0   63G  0 part
+  └─ubuntu--vg-ubuntu--lv 253:0    0 31.5G  0 lvm   /
+sdb                         8:16   0  2.5G  0 disk
+├─sdb1                      8:17   0    2G  0 part
+│ └─md0                     9:0    0    2G  0 raid1
+│   └─netology-lv100m     253:1    0  100M  0 lvm   /tmp/new
+└─sdb2                      8:18   0  511M  0 part
+  └─md1                     9:1    0 1018M  0 raid0
+sdc                         8:32   0  2.5G  0 disk
+├─sdc1                      8:33   0    2G  0 part
+│ └─md0                     9:0    0    2G  0 raid1
+│   └─netology-lv100m     253:1    0  100M  0 lvm   /tmp/new
+└─sdc2                      8:34   0  511M  0 part
+  └─md1                     9:1    0 1018M  0 raid0
+
+root@vagrant:/tmp/new#
 ```
 
-17. Сделайте --fail на устройство в вашем RAID1 md.
+>17. Сделайте --fail на устройство в вашем RAID1 md.
 ### Ответ
 ```bash
+root@vagrant:/tmp/new# mdadm --fail /dev/md0 /dev/sdc1
+mdadm: set /dev/sdc1 faulty in /dev/md0
 ```
 
-18. Подтвердите выводом dmesg, что RAID1 работает в деградированном состоянии.
+>18. Подтвердите выводом dmesg, что RAID1 работает в деградированном состоянии.
 ### Ответ
 ```bash
+root@vagrant:/tmp/new# dmesg
+[49079.298053] md/raid1:md0: Disk failure on sdc1, disabling device.
+               md/raid1:md0: Operation continuing on 1 devices.
 ```
 
 19. Протестируйте целостность файла, несмотря на "сбойный" диск он должен продолжать быть доступен:
@@ -386,7 +419,11 @@ root@vagrant:~# echo $?
 ```
 ### Ответ
 ```bash
+root@vagrant:/tmp/new# gzip -t /tmp/new/test.gz
+root@vagrant:/tmp/new# echo $?
+0
 ```
+***Круто!!!
 
 20. Погасите тестовый хост, vagrant destroy.
 ### Ответ
